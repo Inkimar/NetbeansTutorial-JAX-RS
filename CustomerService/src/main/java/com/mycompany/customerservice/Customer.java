@@ -10,6 +10,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -102,9 +103,10 @@ public class Customer implements Serializable {
     @ManyToOne(optional = false)
     private DiscountCode discountCode;
 
-  
-    @XmlTransient
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer", targetEntity = PurchaseOrder.class,
+            fetch = FetchType.EAGER)
+    @XmlElementWrapper(name = "purchaseorders")
+    @XmlElement(name = "order", required = true)
     private Collection<PurchaseOrder> purchaseOrderCollection;
 
     public Customer() {

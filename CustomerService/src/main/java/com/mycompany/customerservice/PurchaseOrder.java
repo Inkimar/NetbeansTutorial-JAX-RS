@@ -10,6 +10,7 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -20,7 +21,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -29,6 +33,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Entity
 @Table(name = "PURCHASE_ORDER")
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @NamedQueries({
     @NamedQuery(name = "PurchaseOrder.findAll", query = "SELECT p FROM PurchaseOrder p"),
     @NamedQuery(name = "PurchaseOrder.findByOrderNum", query = "SELECT p FROM PurchaseOrder p WHERE p.orderNum = :orderNum"),
@@ -38,32 +43,42 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PurchaseOrder.findByShippingDate", query = "SELECT p FROM PurchaseOrder p WHERE p.shippingDate = :shippingDate"),
     @NamedQuery(name = "PurchaseOrder.findByFreightCompany", query = "SELECT p FROM PurchaseOrder p WHERE p.freightCompany = :freightCompany")})
 public class PurchaseOrder implements Serializable {
+
     private static final long serialVersionUID = 1L;
+
     @Id
     @Basic(optional = false)
     @NotNull
     @Column(name = "ORDER_NUM")
     private Integer orderNum;
+
     @Column(name = "QUANTITY")
     private Short quantity;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+
     @Column(name = "SHIPPING_COST")
     private BigDecimal shippingCost;
+
     @Column(name = "SALES_DATE")
     @Temporal(TemporalType.DATE)
     private Date salesDate;
+
     @Column(name = "SHIPPING_DATE")
     @Temporal(TemporalType.DATE)
     private Date shippingDate;
+
     @Size(max = 30)
     @Column(name = "FREIGHT_COMPANY")
     private String freightCompany;
+
     @JoinColumn(name = "PRODUCT_ID", referencedColumnName = "PRODUCT_ID")
     @ManyToOne(optional = false)
     private Product productId;
-    @JoinColumn(name = "CUSTOMER_ID", referencedColumnName = "CUSTOMER_ID")
-    @ManyToOne(optional = false)
-    private Customer customerId;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "CUSTOMER_ID") //, referencedColumnName = "CUSTOMER_ID")
+    @XmlTransient
+    private Customer customer;
 
     public PurchaseOrder() {
     }
@@ -129,11 +144,11 @@ public class PurchaseOrder implements Serializable {
     }
 
     public Customer getCustomerId() {
-        return customerId;
+        return customer;
     }
 
     public void setCustomerId(Customer customerId) {
-        this.customerId = customerId;
+        this.customer = customerId;
     }
 
     @Override
@@ -160,5 +175,5 @@ public class PurchaseOrder implements Serializable {
     public String toString() {
         return "com.mycompany.customerservice.PurchaseOrder[ orderNum=" + orderNum + " ]";
     }
-    
+
 }
